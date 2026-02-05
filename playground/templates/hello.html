@@ -1,0 +1,19 @@
+<html>
+  <body>
+    {% if name %}
+    <h1>Hello {{ name }}</h1>
+    {% else %}
+    <h1>Hello World</h1>
+    {% endif %}
+    <!-- <ul>
+      {% for order in orders %}
+        {# <li>{{ product.title }} - {{ product.inventory }} - {{ product.unit_price }} - {{ product.collection__title }}</li> #}
+        <li>{{ order.id }} - {{ order.customer.first_name}}</li>
+        <!-- <li>{{ product }}</li> -->
+      {% endfor %}
+    </ul> -->
+
+    {{ result}}
+    <!-- <p>The cheapest product is {{ product.title }} - {{ product.unit_price }}</p> -->
+  </body>
+</html>
