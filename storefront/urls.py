@@ -13,6 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+# this is the Root URLconf file which is used to map URLs to views
+
 from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
@@ -23,5 +26,6 @@ admin.site.index_title = 'Admin'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('playground/', include('playground.urls')),
+    path('store/', include('store.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
