@@ -1,13 +1,16 @@
 from django.urls import path
-from rest_framework.routers import DefaultRouter
+from rest_framework_nested import routers
 from . import views
 
-router = DefaultRouter()
-router.register('products', views.ProductViewSet)
+router = routers.DefaultRouter()
+router.register('products', views.ProductViewSet, basename='products')
 router.register('collections', views.CollectionViewSet)
 
+products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')
+products_router.register('reviews', views.ReviewViewSet, basename='product-reviews')
+
 # URLConf
-urlpatterns = router.urls
+urlpatterns = router.urls + products_router.urls 
 
 # urlpatterns = [
 #     # path('products/', views.product_list),
@@ -16,3 +19,10 @@ urlpatterns = router.urls
 #     path('collections/', views.CollectionList.as_view()),
 #     path('collections/<int:pk>/', views.CollectionDetail.as_view(), name='collection-detail')
 # ]
+
+
+
+# for building api there are 3 steps:
+# 1. Create a serializer
+# 2. Create a view
+# 3. Register a route

@@ -1,6 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
-from store.models import Product, Collection
+from store.models import Product, Collection, Review
 
 # this will be external representation of the product model, the one in models.py is the internal representation (maybe there are some fields that we don't wanna expose to the client)
 # API Model (interface) != Data Model (implementation)
@@ -53,3 +53,24 @@ class ProductSerializer(serializers.ModelSerializer): # this enables us to not w
   #   instance.unit_price = validated_data.get('unit_price')
   #   instance.save()
   #   return instance
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Review
+    fields = ['id', 'date', 'name', 'description']
+
+  def create(self, validated_data):
+    product_id = self.context['product_id']
+    return Review.objects.create(product_id=product_id, **validated_data)
+
+
+
+
+
+
+
+# for building api there are 3 steps:
+# 1. Create a serializer
+# 2. Create a view
+# 3. Register a route

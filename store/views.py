@@ -1,20 +1,33 @@
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
-from .models import Collection, OrderItem, Product
-from .serializers import CollectionSerializer, ProductSerializer
+
+from store.filters import ProductFilter
+from .models import Collection, OrderItem, Product, Review
+from .serializers import CollectionSerializer, ProductSerializer, ReviewSerializer
 
 # Create your views here.
 
 class ProductViewSet(ModelViewSet): # this is alternate to using ListCreateAPIView and RetrieveUpdateDestroyAPIView classes
-  queryset = Product.objects.all()
+  queryset = Product.objects.all() # since we removed this queryset from here we have to explicitly define basename in the urls.py
   serializer_class = ProductSerializer
+  filter_backends = [DjangoFilterBackend]
+  # filterset_fields = ['collection_id', 'unit_price']
+  filterset_class = ProductFilter
+
+  # def get_queryset(self): # this isn't needed now since we using django-filter library now
+  #   queryset = Product.objects.all()
+  #   collection_id = self.request.query_params.get('collection_id')
+  #   if collection_id is not None:
+  #     queryset = queryset.filter(collection_id=collection_id)
+  #   return queryset
 
   def get_serializer_context(self):
     return {'request': self.request}
@@ -32,6 +45,16 @@ class CollectionViewSet(ModelViewSet):
     if Product.objects.filter(collection_id=kwargs['pk']).count() > 0:
       return Response({'error': 'Collection cannot be deleted because it is associated with a product.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     return super().destroy(request, *args, **kwargs)
+
+class ReviewViewSet(ModelViewSet):
+  # queryset = Review.objects.all()
+  serializer_class = ReviewSerializer
+
+  def get_queryset(self):
+    return Review.objects.filter(product_id=self.kwargs['product_pk'])
+
+  def get_serializer_context(self):
+    return {'product_id': self.kwargs['product_pk']}
 
 
 # class ProductList(ListCreateAPIView):
@@ -182,3 +205,14 @@ class CollectionViewSet(ModelViewSet):
 #       return Response({'error': 'Collection cannot be deleted because it is associated with a product.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 #     collection.delete()
 #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+# for building api there are 3 steps:
+# 1. Create a serializer
+# 2. Create a view
+# 3. Register a route
