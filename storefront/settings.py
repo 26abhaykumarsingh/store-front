@@ -42,9 +42,9 @@ INSTALLED_APPS = [
     'playground',
     'debug_toolbar',
     'store',
-    'store_custom',
     'tags',
-    'likes'
+    'likes',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -146,3 +146,5 @@ REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False, # this is to avoid converting decimal fields to string, which is the default behavior
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', # this line can be used to enable panination globally
 }
+
+AUTH_USER_MODEL = 'core.User'
