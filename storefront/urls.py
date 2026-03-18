@@ -27,5 +27,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('playground/', include('playground.urls')),
     path('store/', include('store.urls')),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
+
+
+# djoser library just gives us views and models and serializers but we still require a authentication engine
+# we have two options for that
+# 1. Token based authentication (built in django) (each token is kept in a database and each request requires a database call)
+# 1. JWT (JSON Web Token) (doesn't require a database call for each request)

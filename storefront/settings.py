@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'rest_framework',
+    'djoser',
     'playground',
     'debug_toolbar',
     'store',
@@ -145,6 +147,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False, # this is to avoid converting decimal fields to string, which is the default behavior
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', # this line can be used to enable panination globally
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated'
+    # ],
 }
 
 AUTH_USER_MODEL = 'core.User'
+
+DJOSER = {
+    'SERIALIZERS': {
+        'user_create': 'core.serializers.UserCreateSerializer', # under serializers then under default we can see all the serializers used by djoser then can change what we want to change https://djoser.readthedocs.io/en/latest/settings.html
+        'current_user': 'core.serializers.UserSerializer', # under serializers then under default we can see all the serializers used by djoser then can change what we want to change https://djoser.readthedocs.io/en/latest/settings.html
+    }
+}
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1)
+}
