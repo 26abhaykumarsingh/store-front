@@ -9,6 +9,8 @@ django-debug-toolbar = "*"
 mysqlclient = "==2.0.3"
 djangorestframework-simplejwt = "*"
 djoser = "*"
+pillow = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 

@@ -1,7 +1,7 @@
 from decimal import Decimal
 from django.db import transaction
 from rest_framework import serializers
-from store.models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, Review
+from store.models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, ProductImage, Review
 from store.signals import order_created
 
 # this will be external representation of the product model, the one in models.py is the internal representation (maybe there are some fields that we don't wanna expose to the client)
@@ -34,10 +34,21 @@ class CollectionSerializer(serializers.ModelSerializer):
 
 # OR
 
+class ProductImageSerializer(serializers.ModelSerializer):
+
+  def create(self, validated_data):
+    product_id = self.context['product_id']
+    return ProductImage.objects.create(product_id=product_id, **validated_data)
+  class Meta:
+    model = ProductImage
+    fields = ['id', 'image']
+
+
 class ProductSerializer(serializers.ModelSerializer): # this enables us to not write the validations and all of the fields again in the serializer when they were already defined in the model
+  images = ProductImageSerializer(many=True, read_only=True)
   class Meta:
     model = Product
-    fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'collection']
+    fields = ['id', 'title', 'description', 'slug', 'inventory', 'unit_price', 'price_with_tax', 'collection', 'images']
 
   price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
   

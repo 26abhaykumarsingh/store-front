@@ -18,13 +18,13 @@ from rest_framework import status
 from store.filters import ProductFilter
 from store.pagination import DefaultPagination
 from store.permissions import FullDjangoModelPermissions, IsAdminOrReadOnly, ViewCustomerHistoryPermission
-from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
+from .models import Cart, CartItem, Collection, Customer, Order, OrderItem, Product, ProductImage, Review
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CollectionSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductImageSerializer, ProductSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
 
 # Create your views here.
 
 class ProductViewSet(ModelViewSet): # this is alternate to using ListCreateAPIView and RetrieveUpdateDestroyAPIView classes
-  queryset = Product.objects.all() # since we removed this queryset from here we have to explicitly define basename in the urls.py
+  queryset = Product.objects.prefetch_related('images').all() # since we removed this queryset from here we have to explicitly define basename in the urls.py
   serializer_class = ProductSerializer
   filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
   # filterset_fields = ['collection_id', 'unit_price']
@@ -48,6 +48,16 @@ class ProductViewSet(ModelViewSet): # this is alternate to using ListCreateAPIVi
     if OrderItem.objects.filter(product_id=kwargs['pk']).count() > 0:
       return Response({'error': 'Product cannot be deleted because it is associated with an order item.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     return super().destroy(request, *args, **kwargs)
+
+
+class ProductImageViewSet(ModelViewSet):
+  serializer_class = ProductImageSerializer
+
+  def get_serializer_context(self):
+    return {'product_id': self.kwargs['product_pk']}
+  
+  def get_queryset(self):
+    return ProductImage.objects.filter(product_id=self.kwargs['product_pk'])
 
 class CollectionViewSet(ModelViewSet):
   queryset = Collection.objects.annotate(products_count=Count('products')).all()
