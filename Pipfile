@@ -12,6 +12,7 @@ djoser = "*"
 pillow = "*"
 django-cors-headers = "*"
 django-filter = "*"
+django-templated-mail = "*"
 
 [dev-packages]
 
