@@ -26,7 +26,7 @@ class ProductImageInline(admin.TabularInline):
 
   def thumbnail(self, instance):
     if instance.image.name != '':
-      return format_html('<img src="{}" class="thumbnail" />', instance.image.url)
+      return format_html(f'<img src="{instance.image.url}" class="thumbnail" />')
     return ''
 
 @admin.register(models.Product)

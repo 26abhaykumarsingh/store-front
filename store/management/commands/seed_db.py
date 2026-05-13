@@ -10,11 +10,9 @@ class Command(BaseCommand):
     print('Populating the database...')
     current_dir = os.path.dirname(__file__)
     file_path = os.path.join(current_dir, 'seed.sql')
-    sql = Path(file_path).read_text(encoding='utf-8')
+    sql = Path(file_path).read_text()
 
     with connection.cursor() as cursor:
-        for statement in [s.strip() for s in sql.split(';') if s.strip()]:
-            cursor.execute(statement)
-
-
+      cursor.execute(sql)
+    print('Database populated successfully')
     
