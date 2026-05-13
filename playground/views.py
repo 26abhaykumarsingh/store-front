@@ -12,6 +12,7 @@ from store.models import Order
 from tags.models import TaggedItem
 from django.core.mail import send_mail, mail_admins, BadHeaderError
 from templated_mail.mail import BaseEmailMessage
+from .tasks import notify_customers
 
 # @transaction.atomic() # decorator is used to make the entire view atomic, if any error occurs, all changes will be rolled back
 def say_hello(request):
@@ -179,25 +180,31 @@ def say_hello(request):
 
     # return render(request, 'hello.html', {'name': 'Abhay', 'result': list(queryset36)})
 
-    try:
-        # send_mail('subject', 'message', 'info@abhay.com', ['bob@abhay.com'])
+    # try:
+    #     # send_mail('subject', 'message', 'info@abhay.com', ['bob@abhay.com'])
 
-        # mail_admins('subject', 'message', html_message='message')
+    #     # mail_admins('subject', 'message', html_message='message')
 
-        # message = EmailMessage(
-        #     'subject',
-        #     'message',
-        #     'info@abhay.com',
-        #     ['john@abhay.com']
-        # )
-        # message.attach_file('playground/static/images/cat.jpg')
-        # message.send()
+    #     # message = EmailMessage(
+    #     #     'subject',
+    #     #     'message',
+    #     #     'info@abhay.com',
+    #     #     ['john@abhay.com']
+    #     # )
+    #     # message.attach_file('playground/static/images/cat.jpg')
+    #     # message.send()
 
-        message = BaseEmailMessage(
-            template_name='emails/hello.html',
-            context={'name': 'Abhay'},
-        )
-        message.send(['john@abhay.com'])
-    except BadHeaderError:
-        pass
+    #     message = BaseEmailMessage(
+    #         template_name='emails/hello.html',
+    #         context={'name': 'Abhay'},
+    #     )
+    #     message.send(['john@abhay.com'])
+    # except BadHeaderError:
+    #     pass
+    # return render(request, 'hello.html', {'name': 'Abhay'})
+
+
+    notify_customers.delay('Hello')
+
     return render(request, 'hello.html', {'name': 'Abhay'})
+
