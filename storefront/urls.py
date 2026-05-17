@@ -37,6 +37,7 @@ urlpatterns = [
 if settings.DEBUG:
   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) # this will only happen in development mode
 
+urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]
 
 # djoser library just gives us views and models and serializers but we still require a authentication engine
 # we have two options for that
