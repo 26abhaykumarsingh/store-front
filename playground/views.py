@@ -18,6 +18,9 @@ import requests
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+import logging
+
+logger = logging.getLogger(__name__) #playground.views
 
 # @transaction.atomic() # decorator is used to make the entire view atomic, if any error occurs, all changes will be rolled back
 @cache_page(5*60)
@@ -228,9 +231,15 @@ def say_hello(request):
 
 
 class HelloView(APIView): # this is how we can use caching decorator in class based views, for function based views cache_page decorator is used
-    @method_decorator(cache_page(5*60))
+    # @method_decorator(cache_page(5*60))
     def get(self, request): 
-        response = requests.get('https://httpbin.org/delay/2')
-        data = response.json()
-        return render(request, 'hello.html', {'name': data})
+        try:
+            logger.info('Calling httpbin')
+            response = requests.get('https://httpbin.org/delay/2')
+            logger.info('Received the response')
+            data = response.json()
+            # return render(request, 'hello.html', {'name': data})
+        except requests.ConnectionError:
+            logger.critical('httpbin is offline')
 
+        return render(request, 'hello.html', {'name': 'abhay'})
