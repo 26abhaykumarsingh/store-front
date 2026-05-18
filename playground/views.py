@@ -6,6 +6,7 @@ from django.db.models import Value, Q, F, Func, ExpressionWrapper, DecimalField 
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 from django.db.models.functions import Concat
 from django.contrib.contenttypes.models import ContentType
+from rest_framework.views import APIView
 from store.models import Customer, Product, Collection
 from store.models import OrderItem
 from store.models import Order
@@ -13,8 +14,13 @@ from tags.models import TaggedItem
 from django.core.mail import send_mail, mail_admins, BadHeaderError
 from templated_mail.mail import BaseEmailMessage
 from .tasks import notify_customers
+import requests
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 
 # @transaction.atomic() # decorator is used to make the entire view atomic, if any error occurs, all changes will be rolled back
+@cache_page(5*60)
 def say_hello(request):
     # query_set = Product.objects.all() # every model has an attribute called object which is a manager object which is interface to database, its a remote with buttons we can use to talk to database; query set is an object which encapsultes a query which will be evaluated by django and generate sql statement to sent to our database
     # all returns query set but .get(pk=1) returns a single object, pk is special argument for primary key
@@ -204,7 +210,27 @@ def say_hello(request):
     # return render(request, 'hello.html', {'name': 'Abhay'})
 
 
-    notify_customers.delay('Hello')
+    # notify_customers.delay('Hello')
 
-    return render(request, 'hello.html', {'name': 'Abhay'})
+
+
+    # key = 'httpbin_result' # Instead of this we can just use cache_page decorator on view function for caching
+    # if cache.get(key) is None:
+    #     response = requests.get('https://httpbin.org/delay/2')
+    #     data = response.json()
+    #     # cache.set(key, data, 10*60) # this can be set globally
+
+    response = requests.get('https://httpbin.org/delay/2')
+    data = response.json()
+
+
+    return render(request, 'hello.html', {'name': data})
+
+
+class HelloView(APIView): # this is how we can use caching decorator in class based views, for function based views cache_page decorator is used
+    @method_decorator(cache_page(5*60))
+    def get(self, request): 
+        response = requests.get('https://httpbin.org/delay/2')
+        data = response.json()
+        return render(request, 'hello.html', {'name': data})
 
