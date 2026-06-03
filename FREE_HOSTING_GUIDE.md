@@ -54,13 +54,73 @@ Once logged into your OCI Console:
      - Click **Edit**.
      - Click **Change Image** and select **Ubuntu 22.04 LTS** or **Ubuntu 24.04 LTS** (highly recommended for Docker compatibility).
      - Click **Change Shape**. Select **Ampere (ARM-based)**. Check **VM.Standard.A1.Flex**.
-     - Set OCPUs to **2** and Memory to **12 GB** (leaving you room to create another VM later if you want, or set it to **4 OCPUs and 24 GB** to use your entire free allocation on this single powerful instance!).
-   - **Networking**: Ensure "Create new Virtual Cloud Network (VCN)" is selected, and "Assign a public IPv4 address" is set to **Yes**.
+     - **Note on OCPUs and Memory**: Underneath the selected shape, you will see a section with sliders/input boxes to configure the OCPUs and Memory.
+       - _How to change them_: Drag the sliders or type directly into the input boxes to increase OCPUs (e.g., up to 4) and Memory (e.g., up to 24 GB).
+       - _If you want to host other apps later_: Simply proceed with the default **1 OCPU and 6 GB RAM** (which is still extremely generous and more than enough for this storefront project). This leaves you with free quota to host other applications later! You can also easily edit/resize your instance size later if needed.
+   - **Security Section**:
+     - You will see two toggles: **Shielded instance** and **Confidential computing**.
+     - **Leave both toggles turned OFF** (the default state).
+     - _Note_: You might see a message stating _"Current instance settings prevent you from enabling confidential computing"_. This is completely normal and expected! Confidential computing encrypts memory (RAM) in-use and requires specific AMD/Intel hardware features that are not applicable to standard ARM shapes.
+   - **Networking**:
+     - **Troubleshooting a Common OCI Bug (Disabled Public IP Toggle):**
+       If you choose _Create new virtual cloud network_ inside this wizard, a common OCI bug often disables the public IP toggle with a warning: _"You must select a public subnet to assign a public IPv4 address."_
+       To easily fix this and ensure your VM gets a public IP address immediately (which is crucial so you can access it and users can load your website), follow these simple steps using the **VCN Wizard**:
+       1. Keep your current Compute Instance tab open.
+       2. Open the OCI Console in a new browser tab.
+       3. Click the top-left menu ➔ **Networking** ➔ **Virtual Cloud Networks**.
+       4. Click **Start VCN Wizard** (the blue button).
+       5. Select **VCN with Internet Connectivity** and click **Start**.
+       6. Enter a name (e.g., `storefront-vcn`), keep all other defaults, and click **Next** ➔ **Create**. (This takes 10 seconds and automatically creates a perfect public subnet, internet gateway, and firewalls).
+       7. Go back to your Compute Instance tab and **refresh the page** to reload.
+       8. Now, under **Networking**:
+          - Choose **Select existing virtual cloud network** and select `storefront-vcn`.
+          - Choose **Select existing subnet** and select the **Public Subnet**.
+          - The **Automatically assign public IPv4 address** toggle will now be active, editable, and turned **ON** (blue)!
    - **SSH Keys**:
      - Select **Generate a key pair for me**.
-     - Click **Save private key** (`.key` file) and **Save public key**. Store them safely on your local computer!
-   - **Boot Volume**: Check "Use in-transit encryption" and set the boot volume size to **100 GB** or **150 GB** (within your 200 GB free limit) to give your database plenty of SSD storage.
+     - Click **Download private key** (save the `.key` file safely) and **Download public key**. Keep these secure on your local computer!
+   - **Boot Volume**:
+     - The default size is **46.6 GB**, which is **absolutely more than enough** for this project (Ubuntu + Docker take only ~6 GB, leaving you with 40 GB for database data, caches, and uploaded media).
+     - _Optional:_ If you want more space, check the **"Specify a custom boot volume size"** box and set it to **100 GB** or **150 GB**. Oracle Cloud gives you a total of **200 GB** Always-Free boot volume storage across your entire account, so you can expand it if you like, but the default 46.6 GB is perfectly fine and safe!
+     - Check **"Use in-transit encryption"** (this is free and secure).
 4. Click **Create** at the bottom. It will take 1-2 minutes for the instance status to change from _Provisioning_ to _Running_. Note the **Public IP Address** of your instance.
+
+### ⚠️ Troubleshooting: "Out of Capacity for Shape VM.Standard.A1.Flex"
+
+Because the ARM-based `VM.Standard.A1.Flex` shape is incredibly popular and completely free, Oracle often runs out of available hardware in your selected home region (especially in single-AD regions like Mumbai, India West).
+
+If you see this error for all Availability and Fault Domains, you have two excellent paths forward:
+
+#### Path A: Switch to the Always-Free AMD Shape (Instant & Guaranteed Launch)
+
+Oracle has a secondary Always-Free shape called **VM.Standard.E2.1.Micro**. Since it uses AMD processors and Oracle has massive stock, it is **almost always available instantly**.
+
+1. Under **Image and shape**, click **Edit** ➔ **Change Shape**.
+2. Select **AMD-based** or **Specialty and Legacy** shapes.
+3. Select **VM.Standard.E2.1.Micro** (1 OCPU, 1 GB RAM). This VM is 100% free forever and will launch instantly.
+4. **Will selecting any other shape cost money?**
+   - **Yes, absolutely.** Only shapes with the **"Always Free Eligible"** tag next to them are 100% free forever. Any other shape (like Intel, larger AMD shapes, E3/E4, etc.) will incur costs. Always ensure the "Always Free Eligible" tag is visible on the shape you choose.
+5. **How to run this project on 1 GB of RAM (Swap File optimization):**
+   - **Is swap required?** **Yes, absolutely.** Running Ubuntu, Django, MySQL, Redis, and Celery worker simultaneously requires about **1.2 GB to 1.5 GB of RAM**. With only 1 GB of physical RAM, the Linux kernel will run out of memory and instantly crash your MySQL or Django Docker containers (via the "Out of Memory Killer").
+   - **The Solution:** Creating a **2 GB Swap File** acts as virtual RAM on your SSD, providing a safety net that completely prevents crashes and keeps all services running smoothly and stably 24/7.
+   - ⚠️ **Where to run these commands:** Once your VM starts, connect to it via SSH (as shown in Step 4). Run the following commands **directly inside your VM's SSH terminal (Ubuntu)**, NOT on your local computer's Command Prompt or PowerShell, and **before** starting any Docker containers:
+     ```bash
+     # Create a 2GB swap file on the SSD
+     sudo fallocate -l 2G /swapfile
+     sudo chmod 600 /swapfile
+     sudo mkswap /swapfile
+     sudo swapon /swapfile
+     # Make the swap permanent after reboots
+     echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+     ```
+   - _Note:_ In `entrypoint.sh`, you should reduce the Gunicorn workers to `2` to keep memory usage minimal.
+
+#### Path B: Keep-Trying / Automate VM Creation (For the 24 GB ARM instance)
+
+If you are determined to get the massive ARM instance, you have to wait for another user in your region to delete or release theirs.
+
+1. You can manually click **Create** a few times throughout the day (capacity often refreshes on the hour or late at night).
+2. Alternatively, you can use a script inside the **OCI Cloud Shell** (the terminal icon `>_` at the top right of your OCI console) that repeatedly hits the OCI API every 30 seconds until a slot opens up. A popular free tool for this on GitHub is [oci-arm-creator](https://github.com/hitrov/oci-arm-creator).
 
 ---
 
@@ -101,10 +161,27 @@ By default, OCI blocks all incoming traffic except SSH (Port 22). We must allow 
 Even though we opened port 80 and 443 in the OCI dashboard, **Ubuntu VMs on Oracle Cloud have an OS-level firewall (iptables) that blocks them by default**. We must disable or update this.
 
 1. Open your terminal (or Command Prompt / PowerShell on Windows) and SSH into your VM:
+
    ```bash
    ssh -i /path/to/your/ssh_key.key ubuntu@<YOUR_VM_PUBLIC_IP>
    ```
-2. Once connected, run the following commands to update and clear OS firewalls:
+
+2. **⚠️ CRITICAL: Set up 2 GB Swap File (If you are using the 1 GB AMD instance):**
+   If you created the **AMD VM.Standard.E2.1.Micro** instance (which only has 1 GB of RAM), run these commands **directly inside your VM's SSH session** before doing anything else. This ensures your server does not run out of memory or crash when running MySQL and Django:
+
+   ```bash
+   # Create a 2GB swap file on the SSD
+   sudo fallocate -l 2G /swapfile
+   sudo chmod 600 /swapfile
+   sudo mkswap /swapfile
+   sudo swapon /swapfile
+   # Make the swap permanent after reboots
+   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+   ```
+
+   _(If you are using the ARM Ampere VM with 6GB+ RAM, you can skip this swap file step entirely)._
+
+3. Once connected, run the following commands to update and clear OS firewalls:
 
    ```bash
    # Update system package lists
@@ -125,7 +202,7 @@ Even though we opened port 80 and 443 in the OCI dashboard, **Ubuntu VMs on Orac
    sudo netfilter-persistent save
    ```
 
-3. Close and reconnect to your SSH session to apply the `docker` group changes:
+4. Close and reconnect to your SSH session to apply the `docker` group changes:
    ```bash
    exit
    ```
