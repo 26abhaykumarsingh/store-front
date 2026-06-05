@@ -83,7 +83,8 @@ Once logged into your OCI Console:
      - The default size is **46.6 GB**, which is **absolutely more than enough** for this project (Ubuntu + Docker take only ~6 GB, leaving you with 40 GB for database data, caches, and uploaded media).
      - _Optional:_ If you want more space, check the **"Specify a custom boot volume size"** box and set it to **100 GB** or **150 GB**. Oracle Cloud gives you a total of **200 GB** Always-Free boot volume storage across your entire account, so you can expand it if you like, but the default 46.6 GB is perfectly fine and safe!
      - Check **"Use in-transit encryption"** (this is free and secure).
-4. Click **Create** at the bottom. It will take 1-2 minutes for the instance status to change from _Provisioning_ to _Running_. Note the **Public IP Address** of your instance.
+4. Click **Create** at the bottom. It will take 1-2 minutes for the instance status to change from _Provisioning_ to _Running_.
+   - **How to find your Public IP Address:** On your running instance's details page, scroll down slightly to **Instance Information**. Under the right column, find and copy the **Public IP Address**.
 
 ### ⚠️ Troubleshooting: "Out of Capacity for Shape VM.Standard.A1.Flex"
 
@@ -160,13 +161,14 @@ By default, OCI blocks all incoming traffic except SSH (Port 22). We must allow 
 
 Even though we opened port 80 and 443 in the OCI dashboard, **Ubuntu VMs on Oracle Cloud have an OS-level firewall (iptables) that blocks them by default**. We must disable or update this.
 
-1. Open your terminal (or Command Prompt / PowerShell on Windows) and SSH into your VM:
+1. Locate your Public IP in the OCI Console (Go to **Compute** ➔ **Instances** ➔ click your instance name ➔ look under **Instance Information** in the right column).
+2. Open your terminal (or Command Prompt / PowerShell on Windows) and SSH into your VM:
 
    ```bash
    ssh -i /path/to/your/ssh_key.key ubuntu@<YOUR_VM_PUBLIC_IP>
    ```
 
-2. **⚠️ CRITICAL: Set up 2 GB Swap File (If you are using the 1 GB AMD instance):**
+3. **⚠️ CRITICAL: Set up 2 GB Swap File (If you are using the 1 GB AMD instance):**
    If you created the **AMD VM.Standard.E2.1.Micro** instance (which only has 1 GB of RAM), run these commands **directly inside your VM's SSH session** before doing anything else. This ensures your server does not run out of memory or crash when running MySQL and Django:
 
    ```bash
@@ -181,7 +183,7 @@ Even though we opened port 80 and 443 in the OCI dashboard, **Ubuntu VMs on Orac
 
    _(If you are using the ARM Ampere VM with 6GB+ RAM, you can skip this swap file step entirely)._
 
-3. Once connected, run the following commands to update and clear OS firewalls:
+4. Once connected, run the following commands to update and clear OS firewalls:
 
    ```bash
    # Update system package lists
@@ -202,7 +204,7 @@ Even though we opened port 80 and 443 in the OCI dashboard, **Ubuntu VMs on Orac
    sudo netfilter-persistent save
    ```
 
-4. Close and reconnect to your SSH session to apply the `docker` group changes:
+5. Close and reconnect to your SSH session to apply the `docker` group changes:
    ```bash
    exit
    ```
