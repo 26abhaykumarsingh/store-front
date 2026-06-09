@@ -223,7 +223,6 @@ Create or update `storefront/settings/prod.py` to match this secure setup:
 
 ```python
 import os
-import dj_database_url  # Optional, but environment variables are standard
 from storefront.settings.common import *
 
 DEBUG = False
@@ -239,10 +238,6 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Persist Static/Media via Nginx
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # Production Database (MySQL)
 DATABASES = {
     'default': {
@@ -251,7 +246,7 @@ DATABASES = {
         'HOST': os.environ.get('MYSQL_HOST', 'db'),
         'USER': os.environ.get('MYSQL_USER', 'root'),
         'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
-        'PORT': '3306',
+        'PORT': os.environ.get('MYSQL_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
         }
@@ -273,6 +268,73 @@ CACHES = {
 # Production Celery
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/1')
 ```
+
+### 2. Environment Variables Configuration (`.env`)
+
+To prevent hardcoding sensitive credentials or environment-specific configurations in your codebase, all variables are externalized into a single `.env` file. On your production server, create a `.env` file in the root folder of the project alongside your `docker-compose.yml`.
+
+#### List of Environment Variables
+
+| Variable                   | Description                                                                                          | Required | Example/Default Value                          |
+| :------------------------- | :--------------------------------------------------------------------------------------------------- | :------: | :--------------------------------------------- |
+| **`SECRET_KEY`**           | Django's secret key for cryptographic signing. Generate a unique, long random string for production. | **Yes**  | `your-very-long-secure-random-secret-key-here` |
+| **`ALLOWED_HOSTS`**        | Comma-separated domains/IPs authorized to access this Django site.                                   | **Yes**  | `yourdomain.com,144.24.99.183`                 |
+| **`MYSQL_PASSWORD`**       | Password for the MySQL database root/user. Make it secure and complex.                               | **Yes**  | `mY-sUper-sEcReT-pAsSwOrD-2026`                |
+| **`MYSQL_DATABASE`**       | The name of the MySQL database schema to create/use.                                                 |    No    | `storefront3`                                  |
+| **`MYSQL_USER`**           | Database user name.                                                                                  |    No    | `root`                                         |
+| **`MYSQL_HOST`**           | Database host address. (Within Docker Compose, this should be the database service name).            |    No    | `db`                                           |
+| **`MYSQL_PORT`**           | Port number of the database.                                                                         |    No    | `3306`                                         |
+| **`REDIS_URL`**            | Connection string for Redis cache database.                                                          |    No    | `redis://redis:6379/2`                         |
+| **`CELERY_BROKER_URL`**    | Connection string for Celery Broker database.                                                        |    No    | `redis://redis:6379/1`                         |
+| **`CORS_ALLOWED_ORIGINS`** | Comma-separated frontend origins allowed to make cross-site requests.                                |    No    | `http://localhost:8001,http://127.0.0.1:8001`  |
+| **`EMAIL_BACKEND`**        | Django backend engine to send emails.                                                                |    No    | `django.core.mail.backends.smtp.EmailBackend`  |
+| **`EMAIL_HOST`**           | The SMTP host address for outgoing mails.                                                            |    No    | `smtp.mailgun.org` or `smtp.gmail.com`         |
+| **`EMAIL_HOST_USER`**      | Username credential for the SMTP service.                                                            |    No    | `postmaster@yourdomain.com`                    |
+| **`EMAIL_HOST_PASSWORD`**  | Password/API key credential for the SMTP service.                                                    |    No    | `your-smtp-api-key-or-password`                |
+| **`EMAIL_PORT`**           | Port number of the SMTP server.                                                                      |    No    | `587` or `465` or `2525`                       |
+| **`DEFAULT_FROM_EMAIL`**   | Default sender address displayed on outgoing mails.                                                  |    No    | `support@yourdomain.com`                       |
+
+#### How to Create the `.env` File on Production
+
+When you are logged into your production VM via SSH and are inside the cloned project directory:
+
+1. Create and open the `.env` file using `nano`:
+   ```bash
+   nano .env
+   ```
+2. Paste the environment variables template and customize the values:
+
+   ```env
+   # ==========================================
+   # MANDATORY PRODUCTION CONFIGURATIONS
+   # ==========================================
+   SECRET_KEY=generate_a_secure_long_random_key_here
+   ALLOWED_HOSTS=yourdomain.com,your_vm_public_ip
+   MYSQL_PASSWORD=secure_root_password_change_me
+
+   # ==========================================
+   # DATABASE & CACHE DEFAULTS (OPTIONAL)
+   # ==========================================
+   MYSQL_DATABASE=storefront3
+   MYSQL_USER=root
+   MYSQL_HOST=db
+   MYSQL_PORT=3306
+   REDIS_URL=redis://redis:6379/2
+   CELERY_BROKER_URL=redis://redis:6379/1
+
+   # ==========================================
+   # CORS & SMTP EMAIL SETTINGS (OPTIONAL)
+   # ==========================================
+   CORS_ALLOWED_ORIGINS=http://localhost:8001,http://127.0.0.1:8001
+   EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+   EMAIL_HOST=localhost
+   EMAIL_HOST_USER=
+   EMAIL_HOST_PASSWORD=
+   EMAIL_PORT=2525
+   DEFAULT_FROM_EMAIL=from@abhay.com
+   ```
+
+3. Save and close the file (`Ctrl + O`, `Enter`, then `Ctrl + X`).
 
 ---
 
@@ -408,8 +470,8 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_DATABASE: storefront3
-      MYSQL_ROOT_PASSWORD: secure_root_password_change_me
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-storefront3}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
     expose:
@@ -428,12 +490,22 @@ services:
     restart: always
     environment:
       - DJANGO_SETTINGS_MODULE=storefront.settings.prod
-      - SECRET_KEY=your_super_secret_production_key_change_me
-      - ALLOWED_HOSTS=yourdomain.com,your_vm_public_ip
-      - MYSQL_HOST=db
-      - MYSQL_PASSWORD=secure_root_password_change_me
-      - REDIS_URL=redis://redis:6379/2
-      - CELERY_BROKER_URL=redis://redis:6379/1
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - MYSQL_HOST=${MYSQL_HOST:-db}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-storefront3}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/2}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:8001,http://127.0.0.1:8001}
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-localhost}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_PORT=${EMAIL_PORT:-2525}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-from@abhay.com}
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
@@ -447,10 +519,20 @@ services:
     command: celery -A storefront worker --loglevel=info
     environment:
       - DJANGO_SETTINGS_MODULE=storefront.settings.prod
-      - SECRET_KEY=your_super_secret_production_key_change_me
-      - MYSQL_HOST=db
-      - MYSQL_PASSWORD=secure_root_password_change_me
-      - CELERY_BROKER_URL=redis://redis:6379/1
+      - SECRET_KEY=${SECRET_KEY}
+      - MYSQL_HOST=${MYSQL_HOST:-db}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-storefront3}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/2}
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-localhost}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_PORT=${EMAIL_PORT:-2525}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-from@abhay.com}
     depends_on:
       - db
       - redis
@@ -461,10 +543,20 @@ services:
     command: celery -A storefront beat --loglevel=info
     environment:
       - DJANGO_SETTINGS_MODULE=storefront.settings.prod
-      - SECRET_KEY=your_super_secret_production_key_change_me
-      - MYSQL_HOST=db
-      - MYSQL_PASSWORD=secure_root_password_change_me
-      - CELERY_BROKER_URL=redis://redis:6379/1
+      - SECRET_KEY=${SECRET_KEY}
+      - MYSQL_HOST=${MYSQL_HOST:-db}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-storefront3}
+      - MYSQL_USER=${MYSQL_USER:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/2}
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-localhost}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_PORT=${EMAIL_PORT:-2525}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-from@abhay.com}
     depends_on:
       - db
       - redis

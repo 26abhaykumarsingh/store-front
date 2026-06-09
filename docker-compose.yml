@@ -5,7 +5,7 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_DATABASE: storefront3
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-storefront3}
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
@@ -26,11 +26,21 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=storefront.settings.prod
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=mystore67.duckdns.org,144.24.99.183
-      - MYSQL_HOST=db
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - MYSQL_HOST=${MYSQL_HOST:-db}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-storefront3}
+      - MYSQL_USER=${MYSQL_USER:-root}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - REDIS_URL=redis://redis:6379/2
-      - CELERY_BROKER_URL=redis://redis:6379/1
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/2}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:8001,http://127.0.0.1:8001}
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-localhost}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_PORT=${EMAIL_PORT:-2525}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-from@abhay.com}
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
@@ -45,9 +55,19 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=storefront.settings.prod
       - SECRET_KEY=${SECRET_KEY}
-      - MYSQL_HOST=db
+      - MYSQL_HOST=${MYSQL_HOST:-db}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-storefront3}
+      - MYSQL_USER=${MYSQL_USER:-root}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - CELERY_BROKER_URL=redis://redis:6379/1
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/2}
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-localhost}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_PORT=${EMAIL_PORT:-2525}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-from@abhay.com}
     depends_on:
       - db
       - redis
@@ -59,9 +79,19 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=storefront.settings.prod
       - SECRET_KEY=${SECRET_KEY}
-      - MYSQL_HOST=db
+      - MYSQL_HOST=${MYSQL_HOST:-db}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-storefront3}
+      - MYSQL_USER=${MYSQL_USER:-root}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - CELERY_BROKER_URL=redis://redis:6379/1
+      - MYSQL_PORT=${MYSQL_PORT:-3306}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://redis:6379/1}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/2}
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-localhost}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - EMAIL_PORT=${EMAIL_PORT:-2525}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-from@abhay.com}
     depends_on:
       - db
       - redis
