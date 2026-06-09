@@ -22,7 +22,7 @@ DATABASES = {
         'HOST': os.environ.get('MYSQL_HOST', 'db'),
         'USER': os.environ.get('MYSQL_USER', 'root'),
         'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
-        'PORT': '3306',
+        'PORT': os.environ.get('MYSQL_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
         }
