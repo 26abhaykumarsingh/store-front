@@ -43,3 +43,7 @@ CACHES = {
 
 # Production Celery
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/1')
+
+# Remove development-only apps like silk in production
+if 'silk' in INSTALLED_APPS:
+    INSTALLED_APPS.remove('silk')
