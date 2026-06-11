@@ -47,3 +47,9 @@ CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/1')
 # Remove development-only apps like silk in production
 if 'silk' in INSTALLED_APPS:
     INSTALLED_APPS.remove('silk')
+
+if 'debug_toolbar' in INSTALLED_APPS:
+    INSTALLED_APPS.remove('debug_toolbar')
+
+if 'debug_toolbar.middleware.DebugToolbarMiddleware' in MIDDLEWARE:
+    MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
