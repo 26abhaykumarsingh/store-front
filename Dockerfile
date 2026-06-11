@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     netcat-openbsd \
     curl \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
