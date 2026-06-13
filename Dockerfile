@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir pipenv
 COPY Pipfile Pipfile.lock /app/
 RUN pipenv install --system --deploy
-RUN pip install mysqlclient djangorestframework-nested
+RUN pip install mysqlclient drf-nested-routers
 
 # Copy project files
 COPY . /app/
