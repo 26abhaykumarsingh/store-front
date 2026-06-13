@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir pipenv
 COPY Pipfile Pipfile.lock /app/
 RUN pipenv install --system --deploy
+RUN pip install mysqlclient
 
 # Copy project files
 COPY . /app/
