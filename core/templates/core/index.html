@@ -1,130 +1,221 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Storefront — Django E-Commerce API</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'core/styles.css' %}">
-</head>
-<body>
-  <div class="page-bg" aria-hidden="true">
-    <span class="orb orb--1"></span>
-    <span class="orb orb--2"></span>
-    <span class="orb orb--3"></span>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Storefront — Django E-Commerce API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Outfit:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'core/styles.css' %}" />
+  </head>
+  <body>
+    <div class="page-bg" aria-hidden="true">
+      <span class="orb orb--1"></span>
+      <span class="orb orb--2"></span>
+      <span class="orb orb--3"></span>
+    </div>
 
-  <main class="page">
-    <header class="hero">
-      <div class="hero__brand">
-        <img src="{% static 'core/logo-mark.svg' %}" alt="" class="hero__logo" width="72" height="72">
-        <div>
-          <p class="hero__eyebrow">E-Commerce Platform</p>
-          <h1 class="hero__title">Storefront</h1>
+    <main class="page">
+      <header class="hero">
+        <div class="hero__brand">
+          <img
+            src="{% static 'core/logo-mark.svg' %}"
+            alt=""
+            class="hero__logo"
+            width="72"
+            height="72"
+          />
+          <div>
+            <p class="hero__eyebrow">E-Commerce Platform</p>
+            <h1 class="hero__title">Storefront</h1>
+          </div>
         </div>
-      </div>
-      <p class="hero__tagline">
-        A production-style REST API for products, carts, and orders — built with Django &amp; DRF.
-      </p>
+        <p class="hero__tagline">
+          A production-style REST API for products, carts, and orders — built
+          with Django.
+        </p>
 
-      <div class="stack" aria-label="Core stack">
-        <span class="stack__pill">Django</span>
-        <span class="stack__pill">DRF</span>
-        <span class="stack__pill">MySQL</span>
-        <span class="stack__pill">JWT</span>
-      </div>
-    </header>
+        <div class="stack" aria-label="Core stack">
+          <span class="stack__pill">Django</span>
+          <span class="stack__pill">DRF</span>
+          <span class="stack__pill">MySQL</span>
+          <span class="stack__pill">JWT</span>
+        </div>
+      </header>
 
-    <section class="cta" aria-labelledby="cta-heading">
-      <h2 id="cta-heading" class="cta__heading">Get started</h2>
+      <section class="cta" aria-labelledby="cta-heading">
+        <h2 id="cta-heading" class="cta__heading">Get started</h2>
 
-      {% if user.is_staff %}
+        {% if user.is_staff %}
         <a href="{% url 'admin:index' %}" class="cta__primary">
           <span class="cta__primary-label">Open Admin Panel</span>
           <span class="cta__primary-arrow" aria-hidden="true">→</span>
         </a>
-        <p class="cta__note">Welcome back, <strong>{{ user.get_username }}</strong></p>
-      {% else %}
+        <p class="cta__note">
+          Welcome back, <strong>{{ user.get_username }}</strong>
+        </p>
+        {% else %}
         <a href="/store/" class="cta__primary">
           <span class="cta__primary-label">Explore the API</span>
           <span class="cta__primary-arrow" aria-hidden="true">→</span>
         </a>
-        <p class="cta__note">Browse products, collections, carts &amp; orders</p>
-      {% endif %}
-    </section>
+        <p class="cta__note">
+          Browse products, collections, carts &amp; orders
+        </p>
+        {% endif %}
+      </section>
 
-    <section class="nav-grid" aria-label="Quick navigation">
-      <a href="/store/products/" class="nav-card">
-        <span class="nav-card__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-        </span>
-        <span class="nav-card__body">
-          <span class="nav-card__title">Products</span>
-          <span class="nav-card__path">/store/products/</span>
-        </span>
-      </a>
+      <section class="nav-grid" aria-label="Quick navigation">
+        <a href="/store/products/" class="nav-card">
+          <span class="nav-card__icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+            >
+              <path
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+              />
+            </svg>
+          </span>
+          <span class="nav-card__body">
+            <span class="nav-card__title">Products</span>
+            <span class="nav-card__path">/store/products/</span>
+          </span>
+        </a>
 
-      <a href="/store/collections/" class="nav-card">
-        <span class="nav-card__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-        </span>
-        <span class="nav-card__body">
-          <span class="nav-card__title">Collections</span>
-          <span class="nav-card__path">/store/collections/</span>
-        </span>
-      </a>
+        <a href="/store/collections/" class="nav-card">
+          <span class="nav-card__icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+            >
+              <path
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
+            </svg>
+          </span>
+          <span class="nav-card__body">
+            <span class="nav-card__title">Collections</span>
+            <span class="nav-card__path">/store/collections/</span>
+          </span>
+        </a>
 
-      <a href="{% url 'admin:index' %}" class="nav-card nav-card--accent">
-        <span class="nav-card__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-        </span>
-        <span class="nav-card__body">
-          <span class="nav-card__title">Admin Panel</span>
-          <span class="nav-card__path">/admin/</span>
-        </span>
-      </a>
-    </section>
+        <a href="/auth/users/" class="nav-card">
+          <span class="nav-card__icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          </span>
+          <span class="nav-card__body">
+            <span class="nav-card__title">Users (Auth)</span>
+            <span class="nav-card__path">/auth/users/</span>
+          </span>
+        </a>
 
-    <section class="tech-full" aria-labelledby="tech-full-heading">
-      <h2 id="tech-full-heading" class="tech-full__heading">Also built with</h2>
-      <div class="tech-full__group">
-        <p class="tech-full__label">API &amp; auth</p>
-        <div class="tech-full__pills">
-          <span class="tech-full__pill">Djoser</span>
-          <span class="tech-full__pill">Simple JWT</span>
-          <span class="tech-full__pill">django-filter</span>
-          <span class="tech-full__pill">django-cors-headers</span>
-          <span class="tech-full__pill">DRF Nested Routers</span>
+        <a href="/auth/jwt/create/" class="nav-card">
+          <span class="nav-card__icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+              />
+            </svg>
+          </span>
+          <span class="nav-card__body">
+            <span class="nav-card__title">Create JWT</span>
+            <span class="nav-card__path">/auth/jwt/create/</span>
+          </span>
+        </a>
+
+        <a href="{% url 'admin:index' %}" class="nav-card nav-card--accent">
+          <span class="nav-card__icon" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+            >
+              <path
+                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+              />
+            </svg>
+          </span>
+          <span class="nav-card__body">
+            <span class="nav-card__title">Admin Panel</span>
+            <span class="nav-card__path">/admin/</span>
+          </span>
+        </a>
+      </section>
+
+      <section class="tech-full" aria-labelledby="tech-full-heading">
+        <h2 id="tech-full-heading" class="tech-full__heading">
+          Also built with
+        </h2>
+        <div class="tech-full__group">
+          <p class="tech-full__label">API &amp; auth</p>
+          <div class="tech-full__pills">
+            <span class="tech-full__pill">Djoser</span>
+            <span class="tech-full__pill">Simple JWT</span>
+            <span class="tech-full__pill">django-filter</span>
+            <span class="tech-full__pill">django-cors-headers</span>
+            <span class="tech-full__pill">DRF Nested Routers</span>
+          </div>
         </div>
-      </div>
-      <div class="tech-full__group">
-        <p class="tech-full__label">Data &amp; infrastructure</p>
-        <div class="tech-full__pills">
-          <span class="tech-full__pill">Redis</span>
-          <span class="tech-full__pill">django-redis</span>
-          <span class="tech-full__pill">Celery</span>
-          <span class="tech-full__pill">Flower</span>
+        <div class="tech-full__group">
+          <p class="tech-full__label">Data &amp; infrastructure</p>
+          <div class="tech-full__pills">
+            <span class="tech-full__pill">Redis</span>
+            <span class="tech-full__pill">django-redis</span>
+            <span class="tech-full__pill">Celery</span>
+            <span class="tech-full__pill">Flower</span>
+            <span class="tech-full__pill">Whitenoise</span>
+            <span class="tech-full__pill">Gunicorn</span>
+          </div>
         </div>
-      </div>
-      <div class="tech-full__group">
-        <p class="tech-full__label">Features &amp; tooling</p>
-        <div class="tech-full__pills">
-          <span class="tech-full__pill">Pillow</span>
-          <span class="tech-full__pill">django-templated-mail</span>
-          <span class="tech-full__pill">Django Debug Toolbar</span>
-          <span class="tech-full__pill">Silk</span>
-          <span class="tech-full__pill">pytest</span>
-          <span class="tech-full__pill">Locust</span>
+        <div class="tech-full__group">
+          <p class="tech-full__label">Features &amp; tooling</p>
+          <div class="tech-full__pills">
+            <span class="tech-full__pill">Pillow</span>
+            <span class="tech-full__pill">django-templated-mail</span>
+            <span class="tech-full__pill">Django Debug Toolbar</span>
+            <span class="tech-full__pill">Silk</span>
+            <span class="tech-full__pill">pytest</span>
+            <span class="tech-full__pill">Locust</span>
+            <span class="tech-full__pill">Model Bakery</span>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <footer class="footer">
-      <p>RESTful store API · Role-based admin · ORM &amp; query optimization demos</p>
-    </footer>
-  </main>
-</body>
+      <footer class="footer">
+        <p>
+          RESTful store API · Role-based admin · ORM &amp; query optimization
+          demos
+        </p>
+      </footer>
+    </main>
+  </body>
 </html>
